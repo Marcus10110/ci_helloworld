@@ -325,3 +325,9 @@ endmacro(do_test)
 do_test(main)
 do_test(producer)
 do_test(consumer)
+
+if(UNIX)
+    target_link_libraries(test_consumer ${CMAKE_DL_LIBS})
+endif()
+
+set_target_properties(test_consumer PROPERTIES ENABLE_EXPORTS ON)

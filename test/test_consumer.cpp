@@ -27,7 +27,20 @@
 
 #include <consumer.h>
 
+#include <dlfcn.h>
+
+int* CreateLocal();
+void DestroyLocal(int* target);
+
+extern "C" __attribute__((visibility("default"))) int* CreatePlugin();
+extern "C" __attribute__((visibility("default"))) void DestroyPlugin(int* target);
+
+using create_t = int * ( * )();
+using destroy_t = void( * )( int* );
+
+
 #ifdef _HIPPOMOCKS__ENABLE_CFUNC_MOCKING_SUPPORT
+
 
 TEST_CASE("consumer: failure")
 {
@@ -47,6 +60,63 @@ TEST_CASE("consumer: success")
     mocks.OnCall(p, producer::print_msg);
 
     CHECK_NOTHROW(consumer{p});
+}
+
+TEST_CASE("c func local")
+{
+    REQUIRE(CreateLocal() == nullptr);
+}
+
+TEST_CASE("c func local mocked")
+{
+    MockRepository mocks;
+    int i = 5;
+    mocks.ExpectCallFunc( CreateLocal ).Return( &i );
+    REQUIRE(CreateLocal() == &i );
+}
+
+TEST_CASE("c func plugin")
+{
+    void* handle = dlopen( nullptr, RTLD_LAZY );
+    create_t create_func = reinterpret_cast<create_t>(dlsym( handle, "CreatePlugin" ));
+
+
+    REQUIRE(create_func() == nullptr);
+}
+
+TEST_CASE("c func plugin mocked")
+{
+    MockRepository mocks;
+    int i = 5;
+    mocks.ExpectCallFunc( CreatePlugin ).Return( &i );
+
+    void* handle = dlopen( nullptr, RTLD_LAZY );
+    create_t create_func = reinterpret_cast<create_t>(dlsym( handle, "CreatePlugin" ));
+
+
+    REQUIRE(create_func() == &i);
+}
+
+
+int* CreateLocal()
+{
+    return nullptr;
+}
+
+void DestroyLocal(int* target)
+{
+
+}
+
+
+int* CreatePlugin()
+{
+    return nullptr;
+}
+
+void DestroyPlugin(int* target)
+{
+
 }
 
 #endif
