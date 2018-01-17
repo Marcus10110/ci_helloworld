@@ -70,8 +70,8 @@ list(APPEND HIPPOMOCKS_CMAKE_ARGS
 
 ExternalProject_Add(
     hippomocks
-    GIT_REPOSITORY      https://github.com/Bareflank/hippomocks.git
-    GIT_TAG             v1.2
+    GIT_REPOSITORY      https://github.com/dascandy/hippomocks
+    GIT_TAG             master
     GIT_SHALLOW         1
     CMAKE_ARGS          ${HIPPOMOCKS_CMAKE_ARGS}
     PREFIX              ${CMAKE_BINARY_DIR}/external/hippomocks/prefix
